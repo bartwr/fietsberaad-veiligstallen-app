@@ -31,19 +31,18 @@ const config = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: [
-      'static.veiligstallen.nl'
-    ],
+    domains: ["static.veiligstallen.nl"],
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'places.ns-mlab.nl',
-        port: '',
-        pathname: '*/**',
+        protocol: "https",
+        hostname: "places.ns-mlab.nl",
+        port: "",
+        pathname: "*/**",
       },
     ],
   },
-  output: 'standalone',
+  distDir: "build",
+  output: "standalone",
 };
 
 const nextConfig = withPWA({

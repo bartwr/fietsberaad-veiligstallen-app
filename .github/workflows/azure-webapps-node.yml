@@ -45,7 +45,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "next-medium"
+          app-name: "test-veiligstallen-deploy"
           slot-name: "Production"
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_XXXXXXXXXXXXXX }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_VEILIGSTALLEN }}
           package: ./build/standalone
