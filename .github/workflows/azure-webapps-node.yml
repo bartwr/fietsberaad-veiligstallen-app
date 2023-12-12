@@ -28,11 +28,15 @@ jobs:
         env:
           NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
           NEXT_PUBLIC_WEB_BASE_URL: ${{ vars.NEXT_PUBLIC_WEB_BASE_URL }}
+          DATABASE_URL: ${{ vars.
         run: |
           touch .env
           echo NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL >> .env
           echo NEXT_PUBLIC_WEB_BASE_URL=$NEXT_PUBLIC_WEB_BASE_URL >> .env
           echo NODE_ENV=main >> .env
+
+      - name: print env file
+        run: cat .env
 
       - name: npm install, build, and test
         run: |
