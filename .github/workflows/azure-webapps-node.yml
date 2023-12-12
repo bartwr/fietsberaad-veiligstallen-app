@@ -49,6 +49,9 @@ jobs:
       - name: npm install, build, and test
         env:
           DATABASE_URL: ${{vars.DATABASE_URL}}
+          NEXTAUTH_SECRET: ${{vars.NEXTAUTH_SECRET}}
+          NEXTAUTH_URL: ${{vars.NEXTAUTH_URL}}
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{vars.NEXT_PUBLIC_MAPBOX_TOKEN}}
         run: |
           npm install
           npm run build
