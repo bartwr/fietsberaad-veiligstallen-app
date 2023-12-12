@@ -47,6 +47,8 @@ jobs:
         run: cat .env
 
       - name: npm install, build, and test
+        env:
+          DATABASE_URL: ${{vars.DATABASE_URL}}
         run: |
           npm install
           npm run build
