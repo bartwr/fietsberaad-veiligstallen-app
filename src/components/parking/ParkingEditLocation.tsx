@@ -1,27 +1,35 @@
 // @ts-nocheck
 import * as React from "react";
 import maplibregl from "maplibre-gl";
-import {
-  setMapExtent,
-  setMapZoom,
-  setMapVisibleFeatures,
-  setSelectedParkingId
-} from "~/store/mapSlice";
+// import {
+//   setMapExtent,
+//   setMapZoom,
+//   setMapVisibleFeatures,
+//   setSelectedParkingId
+// } from "~/store/mapSlice";
 
-import { AppState } from "~/store/store";
+// import { AppState } from "~/store/store";
 
 // Import utils
-import { getParkingColor } from "~/utils/theme";
-import { getParkingMarker, isPointInsidePolygon } from "~/utils/map/index";
+// import { getParkingColor } from "~/utils/theme";
+// import { getParkingMarker, isPointInsidePolygon } from "~/utils/map/index";
 import { createEditGeoJson } from "~/utils/map/geojson";
-import { parkingTypes } from "~/utils/parkings";
+// import { parkingTypes } from "~/utils/parkings";
 
 // Import the mapbox-gl styles so that the map is displayed correctly
 import "maplibre-gl/dist/maplibre-gl.css";
 // Import map styles
 import nine3030 from "../../mapStyles/nine3030";
 
-function ParkingEditLocation({parkingCoords, centerCoords, onPan}): React.ReactElement<{ parkingCoords: string; centerCoords: string | undefined, onPan: Function<{lat:number, lng:number}> }> {
+function ParkingEditLocation({
+  parkingCoords,
+  centerCoords,
+  onPan,
+}): React.ReactElement<{
+  parkingCoords: string;
+  centerCoords: string | undefined;
+  onPan: Function<{ lat: number; lng: number }>;
+}> {
   // this is where the map instance will be stored after initialization
   const [stateMap, setStateMap] = React.useState<maplibregl.Map>();
 
@@ -43,10 +51,10 @@ function ParkingEditLocation({parkingCoords, centerCoords, onPan}): React.ReactE
 
     // Get coords from parking variable
     let ccoords;
-    if(centerCoords!==undefined) {
-        ccoords = centerCoords.split(",").map((coord: any) => Number(coord))
+    if (centerCoords !== undefined) {
+      ccoords = centerCoords.split(",").map((coord: any) => Number(coord));
     } else {
-        ccoords = parkingCoords.split(",").map((coord: any) => Number(coord))
+      ccoords = parkingCoords.split(",").map((coord: any) => Number(coord));
     }
 
     // otherwise, create a map instance
@@ -55,19 +63,19 @@ function ParkingEditLocation({parkingCoords, centerCoords, onPan}): React.ReactE
       accessToken: process ? process.env.NEXT_PUBLIC_MAPBOX_TOKEN : "",
       // style: "maplibre://styles/mapbox/streets-v11",
       style: nine3030,
-      center: ccoords ? [ccoords[1], ccoords[0]] : [52.508011,5.473280],
+      center: ccoords ? [ccoords[1], ccoords[0]] : [52.508011, 5.47328],
       zoom: 16,
     });
 
     mapboxMap.on("load", () => onMapLoaded(mapboxMap));
-    mapboxMap.on('move', () => { 
-        if(onPan) {
-            const lng = mapboxMap.getCenter().lng;
-            const lat = mapboxMap.getCenter().lat;
-            onPan(lat, lng);
-        }
-        // }
-     });    
+    mapboxMap.on("move", () => {
+      if (onPan) {
+        const lng = mapboxMap.getCenter().lng;
+        const lat = mapboxMap.getCenter().lat;
+        onPan(lat, lng);
+      }
+      // }
+    });
 
     // Function that executes if component unloads:
     return () => {
@@ -77,16 +85,16 @@ function ParkingEditLocation({parkingCoords, centerCoords, onPan}): React.ReactE
 
   // If 'centerCoords' variable changes: recenter map to new coordinates'
   React.useEffect(() => {
-    if(centerCoords!=='' && centerCoords!==undefined) {
-        // console.log('recenter map @', centerCoords)
-        if(stateMap) {
-            let coords = centerCoords.split(",").map((coord: any) => Number(coord));
-            try {
-                stateMap.setCenter([coords[1], coords[0]]);
-            } catch(e) {
-                console.warn('invalid manual location @', coords)
-            }
+    if (centerCoords !== "" && centerCoords !== undefined) {
+      // console.log('recenter map @', centerCoords)
+      if (stateMap) {
+        let coords = centerCoords.split(",").map((coord: any) => Number(coord));
+        try {
+          stateMap.setCenter([coords[1], coords[0]]);
+        } catch (e) {
+          console.warn("invalid manual location @", coords);
         }
+      }
     }
   }, [centerCoords]);
 
@@ -143,7 +151,7 @@ function ParkingEditLocation({parkingCoords, centerCoords, onPan}): React.ReactE
       });
 
       // Highlight one and only active marker
-      highlighMarker(stateMap, -1)
+      highlighMarker(stateMap, -1);
     }
   }, [stateMap, parkingCoords]);
 
@@ -156,26 +164,42 @@ function ParkingEditLocation({parkingCoords, centerCoords, onPan}): React.ReactE
   };
 
   const highlighMarker = (map: any, id: string) => {
-    map.setPaintProperty("fietsenstallingen-markers", 'circle-radius', ["case", ["==", ["get", "id"], id], 10, 5]);
-    map.setPaintProperty("fietsenstallingen-markers", 'circle-stroke-width', ["case", ["==", ["get", "id"], id], 3, 4]);
-  }
+    map.setPaintProperty("fietsenstallingen-markers", "circle-radius", [
+      "case",
+      ["==", ["get", "id"], id],
+      10,
+      5,
+    ]);
+    map.setPaintProperty("fietsenstallingen-markers", "circle-stroke-width", [
+      "case",
+      ["==", ["get", "id"], id],
+      3,
+      4,
+    ]);
+  };
 
   const cursorStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    width: '20px',
-    height: '20px',
-    background: 'red',
-    borderRadius: '50%',
-    transform: 'translate(-50%, -50%)',
-    pointerEvents: 'none',
-    zIndex: 1
-};
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: "20px",
+    height: "20px",
+    background: "red",
+    borderRadius: "50%",
+    transform: "translate(-50%, -50%)",
+    pointerEvents: "none",
+    zIndex: 1,
+  };
 
-  return <div ref={mapNode} className="rounded-3xl shadow" style={{ width: "100%", height: "696px", position: 'relative'}} >
-    <div className="map-cursor" style={cursorStyle}></div>
-  </div>;
+  return (
+    <div
+      ref={mapNode}
+      className="rounded-3xl shadow"
+      style={{ width: "100%", height: "696px", position: "relative" }}
+    >
+      <div className="map-cursor" style={cursorStyle}></div>
+    </div>
+  );
 }
 
 export default ParkingEditLocation;

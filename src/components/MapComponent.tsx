@@ -8,17 +8,21 @@ import {
   setMapZoom,
   setMapVisibleFeatures,
   setActiveMunicipality,
-  setSelectedParkingId
+  setSelectedParkingId,
 } from "~/store/mapSlice";
 
 import { AppState } from "~/store/store";
 
 // Import utils
 import { getParkingColor } from "~/utils/theme";
-import { getParkingMarker, isPointInsidePolygon, convertCoordinatenToCoords } from "~/utils/map/index";
+import {
+  // getParkingMarker,
+  // isPointInsidePolygon,
+  convertCoordinatenToCoords,
+} from "~/utils/map/index";
 import { getMunicipalityBasedOnLatLng } from "~/utils/map/active_municipality";
 import { mapMoveEndEvents } from "~/utils/map/parkingsFilteringBasedOnExtent";
-import { parkingTypes } from "~/utils/parkings";
+// import { parkingTypes } from "~/utils/parkings";
 
 // Import the mapbox-gl styles so that the map is displayed correctly
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -28,20 +32,20 @@ import nine3030 from "../mapStyles/nine3030";
 import styles from "./MapComponent.module.css";
 
 // Add custom markers
-const addMarkerImages = (map: any) => {
-  const addMarkerImage = async (parkingType: string) => {
-    if (map.hasImage(parkingType)) {
-      console.log("parkingType image for %s already exists", parkingType);
-      return;
-    }
-    const marker = await getParkingMarker(getParkingColor(parkingType));
-    // Add marker image
-    map.addImage(parkingType, { width: 50, height: 50, data: marker });
-  };
-  parkingTypes.forEach((x) => {
-    addMarkerImage(x);
-  });
-};
+// const addMarkerImages = (map: any) => {
+//   const addMarkerImage = async (parkingType: string) => {
+//     if (map.hasImage(parkingType)) {
+//       console.log("parkingType image for %s already exists", parkingType);
+//       return;
+//     }
+//     const marker = await getParkingMarker(getParkingColor(parkingType));
+//     // Add marker image
+//     map.addImage(parkingType, { width: 50, height: 50, data: marker });
+//   };
+//   parkingTypes.forEach((x) => {
+//     addMarkerImage(x);
+//   });
+// };
 
 interface GeoJsonFeature {
   type: string;
@@ -63,7 +67,7 @@ const createGeoJson = (input: GeoJsonFeature[]) => {
   input.forEach((x: any) => {
     if (!x.Coordinaten) return;
 
-    const coords = convertCoordinatenToCoords(x.Coordinaten)
+    const coords = convertCoordinatenToCoords(x.Coordinaten);
 
     features.push({
       type: "Feature",
@@ -104,7 +108,9 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
 
   const mapZoom = useSelector((state: AppState) => state.map.zoom);
 
-  const initialLatLng = useSelector((state: AppState) => state.map.initialLatLng);
+  const initialLatLng = useSelector(
+    (state: AppState) => state.map.initialLatLng
+  );
 
   // const municipalities = useSelector(
   //   (state: AppState) => state.geo.municipalities
@@ -125,17 +131,19 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
 
   // Highlight marker if selectedParkingId changes
   React.useEffect(() => {
-    if(! stateMap) return;
-    if(! selectedParkingId) return;
+    if (!stateMap) return;
+    if (!selectedParkingId) return;
     // Highlight marker
     highlighMarker(stateMap, selectedParkingId);
     // Stop if parking list is full screen
     // If we would continue the parking list would be filtered on click
     // That would result in e.g. only 1 parking in the parking list
-    if(isParkingListVisible) return;
+    if (isParkingListVisible) return;
     // Center map to selected parking
-    const selectedParking = fietsenstallingen.find(x => x.ID === selectedParkingId);
-    if(selectedParking) {
+    const selectedParking = fietsenstallingen.find(
+      (x) => x.ID === selectedParkingId
+    );
+    if (selectedParking) {
       const coords = convertCoordinatenToCoords(selectedParking.Coordinaten);
       stateMap.flyTo({
         center: coords,
@@ -180,8 +188,8 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
 
   // Fly to municipality if initial municipality is given
   React.useEffect(() => {
-    if(! stateMap) return;
-    if(! initialLatLng) return;
+    if (!stateMap) return;
+    if (!initialLatLng) return;
 
     stateMap.flyTo({
       center: initialLatLng,
@@ -190,15 +198,17 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
       essential: true,
       zoom: 13,
     });
-  }, [
-    stateMap,
-    initialLatLng
-  ]);
+  }, [stateMap, initialLatLng]);
 
   // If 'fietsenstallingen' variable changes: Update source data
   React.useEffect(() => {
     try {
-      if (!stateMap || stateMap === undefined || 'getSource' in stateMap === false) return;
+      if (
+        !stateMap ||
+        stateMap === undefined ||
+        "getSource" in stateMap === false
+      )
+        return;
       if (!stateMap.getSource) return;
 
       // Create geojson
@@ -206,30 +216,30 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
 
       // Add or update fietsenstallingen data as sources
       const addOrUpdateSource = (sourceKey) => {
-          const source: maplibregl.GeoJSONSource = stateMap.getSource(
-            sourceKey
-          ) as maplibregl.GeoJSONSource;
-          if (source) {
-            source.setData(geojson);
-          } else {
-            const sourceConfig = {
-              type: "geojson",
-              data: geojson
-            };
-            if(sourceKey === 'fietsenstallingen-clusters') {
-              // We want to cluster
-              sourceConfig.cluster = true;
-              // Max zoom to cluster points on
-              // clusterMaxZoom: 18,
-              // Radius of each cluster when clustering points (defaults to 50)
-              sourceConfig.clusterRadius = 40;
-              sourceConfig.clusterMaxZoom = 12
-            }
-            stateMap.addSource(sourceKey, sourceConfig);
+        const source: maplibregl.GeoJSONSource = stateMap.getSource(
+          sourceKey
+        ) as maplibregl.GeoJSONSource;
+        if (source) {
+          source.setData(geojson);
+        } else {
+          const sourceConfig = {
+            type: "geojson",
+            data: geojson,
+          };
+          if (sourceKey === "fietsenstallingen-clusters") {
+            // We want to cluster
+            sourceConfig.cluster = true;
+            // Max zoom to cluster points on
+            // clusterMaxZoom: 18,
+            // Radius of each cluster when clustering points (defaults to 50)
+            sourceConfig.clusterRadius = 40;
+            sourceConfig.clusterMaxZoom = 12;
           }
-      }
-      addOrUpdateSource('fietsenstallingen');
-      addOrUpdateSource('fietsenstallingen-clusters');
+          stateMap.addSource(sourceKey, sourceConfig);
+        }
+      };
+      addOrUpdateSource("fietsenstallingen");
+      addOrUpdateSource("fietsenstallingen-clusters");
 
       // Add MARKERS layer
       if (!stateMap.getLayer("fietsenstallingen-markers")) {
@@ -238,7 +248,7 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
           source: "fietsenstallingen",
           type: "circle",
           // filter: ["all"],
-          filter: ['!', ['has', 'point_count']],
+          filter: ["!", ["has", "point_count"]],
           paint: {
             "circle-color": "#fff",
             "circle-radius": 5,
@@ -261,8 +271,8 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
               "#00CE83",
             ],
           },
-          'icon-allow-overlap': true,
-          'minzoom': 12,
+          "icon-allow-overlap": true,
+          minzoom: 12,
         });
       }
 
@@ -272,25 +282,27 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
           id: "fietsenstallingen-clusters",
           source: "fietsenstallingen-clusters",
           type: "circle",
-          filter: ['has', 'point_count'],
+          filter: ["has", "point_count"],
           paint: {
             // Use step expressions (https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step)
             // with three steps to implement three types of circles:
             //   * Blue, 20px circles when point count is less than 100
             //   * Yellow, 30px circles when point count is between 100 and 750
             //   * Pink, 40px circles when point count is greater than or equal to 750
-            'circle-color': '#fff',
-            'circle-radius': [
-              'step',
-              ['get', 'point_count'],
-              20, 100,
-              30, 750,
-              40
+            "circle-color": "#fff",
+            "circle-radius": [
+              "step",
+              ["get", "point_count"],
+              20,
+              100,
+              30,
+              750,
+              40,
             ],
             "circle-stroke-width": 3,
-            "circle-stroke-color": '#15AEEF'
+            "circle-stroke-color": "#15AEEF",
           },
-          'maxzoom': 12
+          maxzoom: 12,
         });
       }
 
@@ -300,30 +312,24 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
           id: "fietsenstallingen-clusters-count",
           source: "fietsenstallingen-clusters",
           type: "symbol",
-          filter: ['has', 'point_count'],
+          filter: ["has", "point_count"],
           layout: {
-            'text-field': '{point_count_abbreviated}',
-            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-            'text-size': [
-              'step',
-              ['get', 'point_count'],
-              16, 100,
-              20, 750,
-              30
-            ],
+            "text-field": "{point_count_abbreviated}",
+            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+            "text-size": ["step", ["get", "point_count"], 16, 100, 20, 750, 30],
           },
           paint: {
-            'text-color': '#333333',
+            "text-color": "#333333",
             // 'text-halo-color': '#fff',
             // 'text-halo-width': 2
           },
-          'maxzoom': 12
+          maxzoom: 12,
         });
       }
-    } catch(ex) {
-      console.warn("error in MapComponent layer update useEffect call",ex);
+    } catch (ex) {
+      console.warn("error in MapComponent layer update useEffect call", ex);
     }
-}, [stateMap, fietsenstallingen]);
+  }, [stateMap, fietsenstallingen]);
 
   // Filter map markers if filterActiveTypes filter changes
   React.useEffect(() => {
@@ -335,22 +341,49 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
         ["in", ["get", "type"], ["literal", filterActiveTypes]],
       ];
       if (filterQuery === "") {
-        filter = ["all", ["in", ["get", "type"], ["literal", filterActiveTypes]]];
+        filter = [
+          "all",
+          ["in", ["get", "type"], ["literal", filterActiveTypes]],
+        ];
       } else {
         filter = [
           "all",
           ["in", ["get", "type"], ["literal", filterActiveTypes]],
           [
             "any",
-            [">", ["index-of", ["literal", filterQuery.toLowerCase()], ["get", "title"]], -1],
-            [">", ["index-of", ["literal", filterQuery.toLowerCase()], ["get", "locatie"]], -1],
-            [">", ["index-of", ["literal", filterQuery.toLowerCase()], ["get", "plaats"]], -1],
+            [
+              ">",
+              [
+                "index-of",
+                ["literal", filterQuery.toLowerCase()],
+                ["get", "title"],
+              ],
+              -1,
+            ],
+            [
+              ">",
+              [
+                "index-of",
+                ["literal", filterQuery.toLowerCase()],
+                ["get", "locatie"],
+              ],
+              -1,
+            ],
+            [
+              ">",
+              [
+                "index-of",
+                ["literal", filterQuery.toLowerCase()],
+                ["get", "plaats"],
+              ],
+              -1,
+            ],
           ],
         ];
       }
       stateMap.setFilter("fietsenstallingen-markers", filter);
-    } catch(ex) {
-      console.warn("error in MapComponent layer setfilter useEffect call",ex);
+    } catch (ex) {
+      console.warn("error in MapComponent layer setfilter useEffect call", ex);
     }
   }, [stateMap, fietsenstallingen, filterActiveTypes, filterQuery]);
 
@@ -364,9 +397,19 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
   }, [stateMap, filterActiveTypes]);
 
   const highlighMarker = (map: any, id: string) => {
-    map.setPaintProperty("fietsenstallingen-markers", 'circle-radius', ["case", ["==", ["get", "id"], id], 10, 5]);
-    map.setPaintProperty("fietsenstallingen-markers", 'circle-stroke-width', ["case", ["==", ["get", "id"], id], 3, 4]);
-  }
+    map.setPaintProperty("fietsenstallingen-markers", "circle-radius", [
+      "case",
+      ["==", ["get", "id"], id],
+      10,
+      5,
+    ]);
+    map.setPaintProperty("fietsenstallingen-markers", "circle-stroke-width", [
+      "case",
+      ["==", ["get", "id"], id],
+      3,
+      4,
+    ]);
+  };
 
   // Function that's called if map is loaded
   const onMapLoaded = (mapboxMap) => {
@@ -383,19 +426,19 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
     // Call onMoveEnd if map is loaded, as initialization
     // This function is called when all rendering has been done
     // mapboxMap.on("idle", function () {
-      onMoved(mapboxMap);
+    onMoved(mapboxMap);
     // });
     // Show parking info on click
-    mapboxMap.on('click', 'fietsenstallingen-markers', (e) => {
+    mapboxMap.on("click", "fietsenstallingen-markers", (e) => {
       // Make clicked parking active
       dispatch(setSelectedParkingId(e.features[0].properties.id));
     });
     // Enlarge parking icon on click
-    mapboxMap.on('click', 'fietsenstallingen-markers', (e) => {
+    mapboxMap.on("click", "fietsenstallingen-markers", (e) => {
       highlighMarker(mapboxMap, e.features[0].properties.id);
     });
     // Zoom in on cluster click
-    mapboxMap.on('click', 'fietsenstallingen-clusters', (e) => {
+    mapboxMap.on("click", "fietsenstallingen-clusters", (e) => {
       // Zoom in
       mapboxMap.flyTo({
         center: e.lngLat,
@@ -416,10 +459,10 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
 
   const getActiveMunicipality = async (center) => {
     const municipality = await getMunicipalityBasedOnLatLng(center);
-    if(! municipality) return;
+    if (!municipality) return;
 
     return municipality;
-  }
+  };
 
   const registerMapView = React.useCallback((theMap) => {
     // Set map boundaries
@@ -439,8 +482,10 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
     const center = turf.center(polygon);
     // Get active municipality
     (async () => {
-      if(! center) return;
-      const activeMunicipality = await getActiveMunicipality(center.geometry.coordinates);
+      if (!center) return;
+      const activeMunicipality = await getActiveMunicipality(
+        center.geometry.coordinates
+      );
       dispatch(setActiveMunicipality(activeMunicipality));
     })();
 
@@ -451,7 +496,12 @@ function MapboxMap({ fietsenstallingen = [] }: any) {
 
   const isSm = typeof window !== "undefined" && window.innerWidth < 640;
 
-  return <div ref={mapNode} style={{ width: "100vw", height: "100dvh", overflowY: 'hidden' }} />;
+  return (
+    <div
+      ref={mapNode}
+      style={{ width: "100vw", height: "100dvh", overflowY: "hidden" }}
+    />
+  );
 }
 
 export default MapboxMap;

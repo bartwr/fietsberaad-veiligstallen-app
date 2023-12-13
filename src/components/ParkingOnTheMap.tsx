@@ -7,18 +7,18 @@ import {
   setMapExtent,
   setMapZoom,
   setMapVisibleFeatures,
-  setSelectedParkingId
+  setSelectedParkingId,
 } from "~/store/mapSlice";
 
 import { AppState } from "~/store/store";
 
 // Import utils
-import { getParkingColor } from "~/utils/theme";
-import { getParkingMarker, isPointInsidePolygon } from "~/utils/map/index";
-import { getActiveMunicipality } from "~/utils/map/active_municipality";
-import { mapMoveEndEvents } from "~/utils/map/parkingsFilteringBasedOnExtent";
+// import { getParkingColor } from "~/utils/theme";
+// import { getParkingMarker, isPointInsidePolygon } from "~/utils/map/index";
+// import { getActiveMunicipality } from "~/utils/map/active_municipality";
+// import { mapMoveEndEvents } from "~/utils/map/parkingsFilteringBasedOnExtent";
 import { createGeoJson } from "~/utils/map/geojson";
-import { parkingTypes } from "~/utils/parkings";
+// import { parkingTypes } from "~/utils/parkings";
 
 // Import the mapbox-gl styles so that the map is displayed correctly
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -29,22 +29,22 @@ import nine3030 from "../mapStyles/nine3030";
 import styles from "./MapComponent.module.css";
 
 // Add custom markers
-const addMarkerImages = (map: any) => {
-  const addMarkerImage = async (parkingType: string) => {
-    if (map.hasImage(parkingType)) {
-      console.log("parkingType image for %s already exists", parkingType);
-      return;
-    }
-    const marker = await getParkingMarker(getParkingColor(parkingType));
-    // Add marker image
-    map.addImage(parkingType, { width: 50, height: 50, data: marker });
-  };
-  parkingTypes.forEach((x) => {
-    addMarkerImage(x);
-  });
-};
+// const addMarkerImages = (map: any) => {
+//   const addMarkerImage = async (parkingType: string) => {
+//     if (map.hasImage(parkingType)) {
+//       console.log("parkingType image for %s already exists", parkingType);
+//       return;
+//     }
+//     const marker = await getParkingMarker(getParkingColor(parkingType));
+//     // Add marker image
+//     map.addImage(parkingType, { width: 50, height: 50, data: marker });
+//   };
+//   parkingTypes.forEach((x) => {
+//     addMarkerImage(x);
+//   });
+// };
 
-function ParkingOnTheMap({parking}) {
+function ParkingOnTheMap({ parking }) {
   // this is where the map instance will be stored after initialization
   const [stateMap, setStateMap] = React.useState<maplibregl.Map>();
 
@@ -76,7 +76,9 @@ function ParkingOnTheMap({parking}) {
     if (stateMap) return;
 
     // Get coords from parking variable
-    const coords = parking.Coordinaten ? parking.Coordinaten.split(",").map((coord: any) => Number(coord)) : null; // I.e.: 52.508011,5.473280;
+    const coords = parking.Coordinaten
+      ? parking.Coordinaten.split(",").map((coord: any) => Number(coord))
+      : null; // I.e.: 52.508011,5.473280;
 
     // otherwise, create a map instance
     const mapboxMap = new maplibregl.Map({
@@ -84,7 +86,7 @@ function ParkingOnTheMap({parking}) {
       accessToken: process ? process.env.NEXT_PUBLIC_MAPBOX_TOKEN : "",
       // style: "maplibre://styles/mapbox/streets-v11",
       style: nine3030,
-      center: coords ? [coords[1], coords[0]] : [52.508011,5.473280],
+      center: coords ? [coords[1], coords[0]] : [52.508011, 5.47328],
       zoom: 16,
     });
 
@@ -117,8 +119,8 @@ function ParkingOnTheMap({parking}) {
             type: "geojson",
             data: geojson,
           });
-        } 
-      } catch(ex) {
+        }
+      } catch (ex) {
         console.warn("ParkingOnTheMap - unable to add/update source data", ex);
       }
 
@@ -154,9 +156,9 @@ function ParkingOnTheMap({parking}) {
         });
 
         // Highlight one and only active marker
-        highlighMarker(stateMap, parking.ID)
+        highlighMarker(stateMap, parking.ID);
       }
-    } catch(ex) {
+    } catch (ex) {
       console.warn("ParkingOnTheMap - unable to add/update source data", ex);
     }
   }, [stateMap, parking]);
@@ -170,11 +172,27 @@ function ParkingOnTheMap({parking}) {
   };
 
   const highlighMarker = (map: any, id: string) => {
-    map.setPaintProperty("fietsenstallingen-markers", 'circle-radius', ["case", ["==", ["get", "id"], id], 10, 5]);
-    map.setPaintProperty("fietsenstallingen-markers", 'circle-stroke-width', ["case", ["==", ["get", "id"], id], 3, 4]);
-  }
+    map.setPaintProperty("fietsenstallingen-markers", "circle-radius", [
+      "case",
+      ["==", ["get", "id"], id],
+      10,
+      5,
+    ]);
+    map.setPaintProperty("fietsenstallingen-markers", "circle-stroke-width", [
+      "case",
+      ["==", ["get", "id"], id],
+      3,
+      4,
+    ]);
+  };
 
-  return <div ref={mapNode} className="rounded-3xl shadow" style={{ width: "414px", height: "696px" }} />;
+  return (
+    <div
+      ref={mapNode}
+      className="rounded-3xl shadow"
+      style={{ width: "414px", height: "696px" }}
+    />
+  );
 }
 
 export default ParkingOnTheMap;
