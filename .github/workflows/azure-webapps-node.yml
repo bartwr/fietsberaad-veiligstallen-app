@@ -56,7 +56,6 @@ jobs:
           NEXT_PUBLIC_WEB_BASE_URL: ${{ vars.NEXT_PUBLIC_WEB_BASE_URL }}
         run: |
           npm install
-          cp .env ./build/standalone/.env
           npm run build
           mv ./build/static ./build/standalone/build
           mv ./public ./build/standalone
