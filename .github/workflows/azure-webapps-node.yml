@@ -64,6 +64,6 @@ jobs:
         with:
           # app-name: "test-veiligstallen-deploy"
           app-name: "vstfb-eu-acc-app01"
-          slot-name: "Production"
+          # slot-name: "Production"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_VEILIGSTALLEN }}
           package: ./build/standalone
