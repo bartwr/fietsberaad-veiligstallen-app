@@ -65,8 +65,8 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          # app-name: "test-veiligstallen-deploy"
-          app-name: "vstfb-eu-acc-app01"
+          app-name: "test-veiligstallen-deploy"
+          # app-name: "vstfb-eu-acc-app01"
           # slot-name: "Production"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_VEILIGSTALLEN }}
           package: ./build/standalone
