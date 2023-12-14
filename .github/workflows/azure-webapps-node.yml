@@ -47,23 +47,14 @@ jobs:
         run: cat .env
 
       - name: npm install, build, and test
-        env:
-          DATABASE_URL: ${{vars.DATABASE_URL}}
-          NEXTAUTH_SECRET: ${{vars.NEXTAUTH_SECRET}}
-          NEXTAUTH_URL: ${{vars.NEXTAUTH_URL}}
-          NEXT_PUBLIC_MAPBOX_TOKEN: ${{vars.NEXT_PUBLIC_MAPBOX_TOKEN}}
-          NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
-          NEXT_PUBLIC_WEB_BASE_URL: ${{ vars.NEXT_PUBLIC_WEB_BASE_URL }}
+        # env:
+        #   DATABASE_URL: ${{vars.DATABASE_URL}}
+        #   NEXTAUTH_SECRET: ${{vars.NEXTAUTH_SECRET}}
+        #   NEXTAUTH_URL: ${{vars.NEXTAUTH_URL}}
+        #   NEXT_PUBLIC_MAPBOX_TOKEN: ${{vars.NEXT_PUBLIC_MAPBOX_TOKEN}}
+        #   NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
+        #   NEXT_PUBLIC_WEB_BASE_URL: ${{ vars.NEXT_PUBLIC_WEB_BASE_URL }}
         run: |
-          touch .env
-          echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL" >> .env
-          echo "NEXT_PUBLIC_WEB_BASE_URL=$NEXT_PUBLIC_WEB_BASE_URL" >> .env
-          echo "NODE_ENV=production >>" .env
-          echo "DATABASE_URL=$DATABASE_URL" >> .env
-          echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env
-          echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env
-          echo "NEXT_PUBLIC_MAPBOX_TOKEN=$NEXT_PUBLIC_MAPBOX_TOKEN" >> .env
-
           npm install
           npm run build
           mv ./build/static ./build/standalone/build
