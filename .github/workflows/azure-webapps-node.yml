@@ -47,13 +47,6 @@ jobs:
         run: cat .env
 
       - name: npm install, build, and test
-        # env:
-        #   DATABASE_URL: ${{vars.DATABASE_URL}}
-        #   NEXTAUTH_SECRET: ${{vars.NEXTAUTH_SECRET}}
-        #   NEXTAUTH_URL: ${{vars.NEXTAUTH_URL}}
-        #   NEXT_PUBLIC_MAPBOX_TOKEN: ${{vars.NEXT_PUBLIC_MAPBOX_TOKEN}}
-        #   NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
-        #   NEXT_PUBLIC_WEB_BASE_URL: ${{ vars.NEXT_PUBLIC_WEB_BASE_URL }}
         run: |
           npm install
           npm run build
@@ -64,8 +57,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "test-veiligstallen-deploy"
-          # app-name: "vstfb-eu-acc-app01"
-          # slot-name: "Production"
+          app-name: ${{ vars.AZURE_APP_NAME}}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_VEILIGSTALLEN }}
           package: ./build/standalone
