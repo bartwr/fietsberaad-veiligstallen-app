@@ -1,0 +1,5 @@
+*PublishSettings*
+variables.env
+secrets.env
+*.pem
+INFO.md
