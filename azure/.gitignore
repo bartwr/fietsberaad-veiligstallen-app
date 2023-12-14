@@ -1,0 +1,6 @@
+webapp_logs
+*PublishSettings*
+logfiles/*
+.env.test
+.env.vs
+.env
