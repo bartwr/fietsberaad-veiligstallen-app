@@ -1,4 +1,4 @@
-import { abonnementsvorm_fietsenstalling, abonnementsvormen, fietsenstallingtypen } from '@prisma/client';
+import { abonnementsvormen, fietsenstallingtypen, tariefcodes } from '@prisma/client';
 
 /* This type is used when returning parking details to the client                */
 /* By adding fields to this structure, it is possible to keep track which fields */
@@ -96,5 +96,6 @@ export type ParkingDetailsType = {
             ID: string,
             Name: string
         }
-    }[]
+    }[],
+    tariefcode: tariefcodes
 }

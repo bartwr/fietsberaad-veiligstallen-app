@@ -17,7 +17,6 @@ import { cbsCodeFromMunicipality, getMunicipalityBasedOnCbsCode } from "~/utils/
 import { Tabs, Tab, FormHelperText, Typography } from "@mui/material";
 
 /* Use nicely formatted items for items that can not be changed yet */
-import ParkingViewTarief from "~/components/parking/ParkingViewTarief";
 import type { ServiceType } from "~/components/parking/ParkingViewServices";
 
 import ParkingViewAbonnementen from "~/components/parking/ParkingViewAbonnementen";
@@ -30,11 +29,22 @@ import ParkingViewBeheerder from "./ParkingViewBeheerder";
 import { type MunicipalityType, getMunicipalityBasedOnLatLng } from "~/utils/map/active_municipality";
 import { geocodeAddress, reverseGeocode } from "~/utils/nomatim";
 import toast from 'react-hot-toast';
+import type { tariefcodes } from "@prisma/client";
 
 type connectFietsenstallingType = {
   connect: {
     id: string
   }
+}
+
+type connectTariefcodeType = {
+  connect: {
+    ID: number
+  }
+}
+
+type disconnectTariefcodeType = {
+  disconnect: true
 }
 
 
@@ -49,6 +59,7 @@ export type ParkingEditUpdateStructure = {
   DateCreated?: Date;
   DateModified?: Date;
   SiteID?: string;
+  tariefcode?: connectTariefcodeType | disconnectTariefcodeType;
   Beheerder?: string,
   BeheerderContact?: string,
 
@@ -95,6 +106,7 @@ const ParkingEdit = ({ parkingdata, onClose, onChange }: { parkingdata: ParkingD
   const [newPostcode, setNewPostcode] = React.useState<string | undefined>(undefined);
   const [newPlaats, setNewPlaats] = React.useState<string | undefined>(undefined);
   const [newCoordinaten, setNewCoordinaten] = React.useState<string | undefined>(undefined);
+  const [newTariefcode, setNewTariefcode] = React.useState<number | undefined>(undefined); // -1 -> don't show
 
   // used for map recenter when coordinates are manually changed
   const [centerCoords, setCenterCoords] = React.useState<string | undefined>(undefined);
@@ -114,6 +126,7 @@ const ParkingEdit = ({ parkingdata, onClose, onChange }: { parkingdata: ParkingD
 
   type StallingType = { id: string, name: string, sequence: number };
   const [allTypes, setAllTypes] = React.useState<StallingType[]>([]);
+  const [allTariefcodes, setAllTariefcodes] = React.useState<tariefcodes[]>([]);
   const [newStallingType, setNewStallingType] = React.useState<string | undefined>(undefined);
 
   const [currentMunicipality, setCurrentMunicipality] = React.useState<MunicipalityType | undefined>(undefined);
@@ -140,6 +153,22 @@ const ParkingEdit = ({ parkingdata, onClose, onChange }: { parkingdata: ParkingD
         setAllTypes(json);
       } catch (err) {
         console.error("get all types error", err);
+      }
+    })();
+  }, [])
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const response = await fetch(
+          `/api/tariefcodes/`
+        );
+        const json = await response.json();
+        if (!json) return;
+
+        setAllTariefcodes(json);
+      } catch (err) {
+        console.error("get all tariefcodes error", err);
       }
     })();
   }, [])
@@ -221,13 +250,16 @@ const ParkingEdit = ({ parkingdata, onClose, onChange }: { parkingdata: ParkingD
       { type: "string", text: "invoer van de plaats", value: parkingdata.Plaats, newvalue: newPlaats },
       { type: "string", text: "selectie van de gemeente", value: parkingdata.SiteID, newvalue: newSiteID },
       { type: "coordinaten", text: "instellen van de locatie op de kaart", value: parkingdata.Coordinaten, newvalue: newCoordinaten },
+      { type: "string", text: "invoer van het stallingstarief", value: parkingdata.tariefcode?.ID || -1, newvalue: newTariefcode },
     ]
     // parkingdata.Postcode is optional
 
     // FMS & ExploitantID cannot be changed for now, so no need to check those for changes
     if (parkingdata.FMS !== true && parkingdata.ExploitantID === null) {
       checks.push({ type: "string", text: "invoer van de contactgegevens van de beheerder", value: parkingdata.Beheerder, newvalue: newBeheerder });
-      checks.push({ type: "string", text: "invoer van de contactgegevens van de beheerder", value: parkingdata.BeheerderContact, newvalue: newBeheerderContact });
+      if (parkingdata.Beheerder !== "NS") {
+        checks.push({ type: "string", text: "invoer van de contactgegevens van de beheerder", value: parkingdata.BeheerderContact, newvalue: newBeheerderContact });
+      }
     }
 
     // Not checked / check not required
@@ -270,7 +302,17 @@ const ParkingEdit = ({ parkingdata, onClose, onChange }: { parkingdata: ParkingD
     if (newBeheerder !== undefined) { update.Beheerder = newBeheerder; }
     if (newBeheerderContact !== undefined) { update.BeheerderContact = newBeheerderContact; }
 
-    if (newStallingType !== undefined) { update.fietsenstalling_type = { connect: { id: newStallingType } }; }
+    if (newStallingType !== undefined) { update.fietsenstalling_type = { connect: { id: newStallingType.toString() } }; }
+    let currentCode = parkingdata.tariefcode && parkingdata.tariefcode.ID ? parkingdata.tariefcode.ID : -1; // -1 -> don't show
+    if (undefined !== newTariefcode) {
+      if (newTariefcode !== currentCode) {
+        if (newTariefcode === -1) {
+          update.tariefcode = { disconnect: true };
+        } else {
+          update.tariefcode = { connect: { ID: newTariefcode } };
+        }
+      }
+    }
 
     if (undefined !== newOpening) {
       for (const keystr in newOpening) {
@@ -688,6 +730,20 @@ const ParkingEdit = ({ parkingdata, onClose, onChange }: { parkingdata: ParkingD
 
           <HorizontalDivider className="my-4" />
 
+          <SectionBlock heading="Tarief">
+            <select value={newTariefcode !== undefined ? newTariefcode : parkingdata.tariefcode?.ID || -1} onChange={(event) => { setNewTariefcode(Number(event.target.value)) }}>
+              <option key={'not-shown'} value={-1}>
+                Wordt niet getoond
+              </option>
+              {allTariefcodes.map(code => (
+                <option key={code.ID} value={code.ID}>
+                  {code.Omschrijving}
+                </option>
+              ))}
+            </select>
+          </SectionBlock>
+          <HorizontalDivider className="my-4" />
+
           <SectionBlock heading="Status">
             {/* <select value={parkingdata.Status} onChange={() => { }} disabled>
               {statusTypes.map(type => (
@@ -768,32 +824,6 @@ const ParkingEdit = ({ parkingdata, onClose, onChange }: { parkingdata: ParkingD
           openingChanged={handlerSetNewOpening}
         />
       </div>);
-  }
-
-  const renderTabTarieven = (visible: boolean = false) => {
-    return (
-      <div className="flex justify-between w-full mt-10" style={{ display: visible ? "flex" : "none" }}>
-        <ParkingViewTarief parkingdata={parkingdata} />
-      </div>);
-
-    return (
-      <div className="flex justify-between w-full mt-10">
-        <SectionBlockEdit>
-          <div className="font-bold">Fietsen</div>
-          <div className="ml-2 grid w-full grid-cols-2">
-            <div>Eerste 24 uur:</div>
-            <div className="text-right sm:text-center">gratis</div>
-            <div>Daarna per 24 uur:</div>
-            <div className="text-right sm:text-center">&euro;0,60</div>
-          </div>
-          <div className="mt-4 font-bold">Bromfietsen</div>
-          <div className="ml-2 grid w-full grid-cols-2">
-            <div>Eerste 24 uur:</div>
-            <div className="text-right sm:text-center">&euro;0,60</div>
-          </div>
-        </SectionBlockEdit>
-      </div>
-    );
   }
 
   const renderTabCapaciteit = (visible: boolean = false) => {
@@ -941,7 +971,6 @@ const ParkingEdit = ({ parkingdata, onClose, onChange }: { parkingdata: ParkingD
         {hasID && <Tab label="Afbeelding" value='tab-afbeelding' />}
         <Tab label="Openingstijden" value='tab-openingstijden' />
 
-        {/* <Tab label="Tarieven" value='tab-tarieven'/> */}
         {hasID && isLoggedIn && <Tab label="Capaciteit" value='tab-capaciteit' />}
         {hasID && isLoggedIn && <Tab label="Abonnementen" value='tab-abonnementen' />}
         {isLoggedIn && <Tab label="Beheerder" value='tab-beheerder' />}
@@ -950,7 +979,6 @@ const ParkingEdit = ({ parkingdata, onClose, onChange }: { parkingdata: ParkingD
       {renderTabAlgemeen(selectedTab === 'tab-algemeen')}
       {renderTabAfbeelding(selectedTab === 'tab-afbeelding' && hasID)}
       {renderTabOpeningstijden(selectedTab === 'tab-openingstijden')}
-      {renderTabTarieven(selectedTab === 'tab-tarieven')}
       {renderTabCapaciteit(selectedTab === 'tab-capaciteit' && hasID && isLoggedIn)}
       {renderTabAbonnementen(selectedTab === 'tab-abonnementen' && hasID && isLoggedIn)}
       {renderTabBeheerder(selectedTab === 'tab-beheerder' && isLoggedIn)}

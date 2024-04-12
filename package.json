@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@prisma-korea/prisma-generator-proto": "^2.3.2",
-    "@prisma/client": "^5.11.0",
+    "@prisma/client": "^5.12.1",
     "@types/bcrypt": "^5.0.0",
     "@types/eslint": "^8.21.3",
     "@types/formidable": "^3.4.3",
@@ -73,7 +73,7 @@
     "postcss": "^8.4.21",
     "prettier": "^2.8.6",
     "prettier-plugin-tailwindcss": "^0.2.5",
-    "prisma": "^5.11.0",
+    "prisma": "^5.12.1",
     "tailwindcss": "^3.2.7",
     "typescript": "^5.0.2"
   },

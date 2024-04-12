@@ -788,6 +788,8 @@ model fietsenstallingen {
 
     fietsenstalling_secties fietsenstalling_sectie[]
 
+    tariefcode tariefcodes? @relation(fields: [Tariefcode], references: [ID])
+
     abonnementsvorm_fietsenstalling abonnementsvorm_fietsenstalling[]
 
     exploitant contacts? @relation(fields: [ExploitantID], references: [ID], onDelete: Restrict, onUpdate: Restrict, map: "FKCC75C0BE66279D19")
@@ -1277,10 +1279,12 @@ model services {
 //     @@index([type], map: "type")
 // }
 
-// model tariefcodes {
-//     ID           Int    @id @default(autoincrement())
-//     Omschrijving String @db.VarChar(100)
-// }
+model tariefcodes {
+    ID           Int    @id @default(autoincrement())
+    Omschrijving String @db.VarChar(100)
+
+    fietsenstallingen fietsenstallingen[]
+}
 
 // model tariefregels {
 //     tariefregelID     Int      @id @default(autoincrement())

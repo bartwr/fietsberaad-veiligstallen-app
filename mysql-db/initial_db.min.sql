@@ -64,6 +64,23 @@ CREATE TABLE IF NOT EXISTS `abonnementsvormen` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
+-- Structuur van  tabel veiligstallen_test.tariefcodes wordt geschreven
+CREATE TABLE IF NOT EXISTS `tariefcodes` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Omschrijving` varchar(100) NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+
+-- Dumpen data van tabel veiligstallen_test.tariefcodes: ~5 rows (ongeveer)
+/*!40000 ALTER TABLE `tariefcodes` DISABLE KEYS */;
+REPLACE INTO `tariefcodes` (`ID`, `Omschrijving`) VALUES
+	(1, 'betaald'),
+	(2, 'gratis'),
+	(3, 'weekend gratis'),
+	(4, 'overdag gratis'),
+	(5, 'eerste dag gratis');
+/*!40000 ALTER TABLE `tariefcodes` ENABLE KEYS */;
+
 -- Dumpen data van tabel veiligstallen_test.abonnementsvormen: ~37 rows (ongeveer)
 /*!40000 ALTER TABLE `abonnementsvormen` DISABLE KEYS */;
 REPLACE INTO `abonnementsvormen` (`ID`, `naam`, `omschrijving`, `prijs`, `tijdsduur`, `conditions`, `siteID`, `bikeparkTypeID`, `isActief`, `exploitantSiteID`, `idmiddelen`, `contractID`, `paymentAuthorizationID`, `conditionsID`) VALUES
@@ -8975,23 +8992,6 @@ CREATE TABLE IF NOT EXISTS `splunk_metadata` (
 REPLACE INTO `splunk_metadata` (`id`, `lastTransactionsUpdate`) VALUES
 	(1, '2020-08-05 06:15:00');
 /*!40000 ALTER TABLE `splunk_metadata` ENABLE KEYS */;
-
--- Structuur van  tabel veiligstallen_test.tariefcodes wordt geschreven
-CREATE TABLE IF NOT EXISTS `tariefcodes` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `Omschrijving` varchar(100) NOT NULL,
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
-
--- Dumpen data van tabel veiligstallen_test.tariefcodes: ~5 rows (ongeveer)
-/*!40000 ALTER TABLE `tariefcodes` DISABLE KEYS */;
-REPLACE INTO `tariefcodes` (`ID`, `Omschrijving`) VALUES
-	(1, 'betaald'),
-	(2, 'gratis'),
-	(3, 'weekend gratis'),
-	(4, 'overdag gratis'),
-	(5, 'eerste dag gratis');
-/*!40000 ALTER TABLE `tariefcodes` ENABLE KEYS */;
 
 -- Structuur van  tabel veiligstallen_test.tariefregels wordt geschreven
 CREATE TABLE IF NOT EXISTS `tariefregels` (

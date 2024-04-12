@@ -11,7 +11,6 @@ import { Button } from "~/components/Button";
 import ParkingOnTheMap from "~/components/ParkingOnTheMap";
 import SectionBlock from "~/components/SectionBlock";
 import ParkingViewOpening from "~/components/parking/ParkingViewOpening";
-import ParkingViewTarief from "~/components/parking/ParkingViewTarief";
 import ParkingViewCapaciteit from "~/components/parking/ParkingViewCapaciteit";
 import ParkingViewAbonnementen from "~/components/parking/ParkingViewAbonnementen";
 import ParkingViewBeheerder from "~/components/parking/ParkingViewBeheerder";
@@ -66,8 +65,6 @@ const ParkingView = ({
     "toezicht",
     "geautomatiseerd",
   ].includes(parkingdata.Type);
-  const showTarief = false;
-
   let status = "";
   switch (parkingdata.Status) {
     case "0": status = "Verborgen";
@@ -141,7 +138,13 @@ const ParkingView = ({
             <ParkingViewOpening parkingdata={parkingdata} />
           ) : null}
 
-          {showTarief ? <ParkingViewTarief parkingdata={parkingdata} /> : null}
+          {parkingdata.tariefcode !== null ?
+            <>
+              <SectionBlock heading="Tarief">
+                {parkingdata.tariefcode.Omschrijving}
+              </SectionBlock>
+              <HorizontalDivider className="my-4" />
+            </> : null}
 
           <ParkingViewServices parkingdata={parkingdata} />
 
@@ -159,11 +162,11 @@ const ParkingView = ({
 
           {isLoggedIn && status !== '' ?
             <>
-              <HorizontalDivider className="my-4" />
-
               <SectionBlock heading="Status">
                 {status}
               </SectionBlock>
+
+              <HorizontalDivider className="my-4" />
             </> : null}
 
           <p className="mb-10">{/*Some spacing*/}</p>
